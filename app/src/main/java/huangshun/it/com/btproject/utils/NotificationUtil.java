@@ -9,7 +9,7 @@ import android.content.Intent;
 
 import huangshun.it.com.btproject.R;
 
-public class Utils {
+public class NotificationUtil {
 	public static final int NOTIFY_ID1 = 1001;
 	
 	public static void notifyMessage(Context context, String msg, Activity activity){

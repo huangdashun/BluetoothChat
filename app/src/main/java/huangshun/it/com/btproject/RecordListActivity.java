@@ -16,6 +16,8 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
 
+import huangshun.it.com.btproject.DB.DatabaseHelper;
+
 public class RecordListActivity extends Activity{
 	private ArrayAdapter<CharSequence> queryArrayAdapter;
 	private ListView queryListView;

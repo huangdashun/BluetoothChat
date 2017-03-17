@@ -1,4 +1,4 @@
-package huangshun.it.com.btproject.UI;
+package huangshun.it.com.btproject.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;

@@ -1,4 +1,4 @@
-package huangshun.it.com.btproject;
+package huangshun.it.com.btproject.DB;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

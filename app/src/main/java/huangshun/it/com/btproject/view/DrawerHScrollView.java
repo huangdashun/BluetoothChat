@@ -1,5 +1,5 @@
 
-package huangshun.it.com.btproject.UI;
+package huangshun.it.com.btproject.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
@@ -10,14 +10,14 @@ import android.view.ViewParent;
 import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 public class DrawerHScrollView extends HorizontalScrollView {
 	private static final String TAG = "DrawerHScrollView";
 	
 	private int currentPage = 0;
 	private int totalPages = 1;
-	private static Hashtable<Integer, Integer> positionLeftTopOfPages = new Hashtable();
+	private static HashMap<Integer, Integer> positionLeftTopOfPages = new HashMap();
 	private LinearLayout mPageIndicLayout;
 	private Context mContext;
 
@@ -65,12 +65,12 @@ public class DrawerHScrollView extends HorizontalScrollView {
 		// 添加表情多页图标布局
 		mPageIndicLayout = new LinearLayout(mContext);
 		mPageIndicLayout.setGravity(Gravity.CENTER);
-		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+		ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 		mPageIndicLayout.setLayoutParams(params);
 		ViewParent parent = this.getParent();
 		if(parent instanceof LinearLayout){
 			LinearLayout layout = (LinearLayout)parent;
-			layout.addView(mPageIndicLayout, new LinearLayout.LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT));
+			layout.addView(mPageIndicLayout, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 		}
 	}
 

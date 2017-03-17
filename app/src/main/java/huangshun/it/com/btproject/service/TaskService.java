@@ -1,4 +1,4 @@
-package huangshun.it.com.btproject.task;
+package huangshun.it.com.btproject.service;
 
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
@@ -21,7 +21,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
 
-import huangshun.it.com.btproject.UI.ChatListViewAdapter;
+import huangshun.it.com.btproject.Model.Task;
+import huangshun.it.com.btproject.view.ChatListViewAdapter;
 import huangshun.it.com.btproject.protocol.DataProtocol;
 import huangshun.it.com.btproject.protocol.Message;
 import huangshun.it.com.btproject.sound.SoundEffect;
@@ -33,10 +34,10 @@ import huangshun.it.com.btproject.sound.SoundEffect;
  * @author Administrator
  */
 public class TaskService extends Service {
-    public static final int BT_STAT_WAIT = 0;
-    public static final int BT_STAT_CONN = 1;
-    public static final int BT_STAT_ONLINE = 2;
-    public static final int BT_STAT_UNKNOWN = 3;
+    public static final int BT_STAT_WAIT = 0;//等待
+    public static final int BT_STAT_CONN = 1;//连接
+    public static final int BT_STAT_ONLINE = 2;//在线
+    public static final int BT_STAT_UNKNOWN = 3;//未知
 
 
     public static final String DEVICE_NAME = "device_name";
