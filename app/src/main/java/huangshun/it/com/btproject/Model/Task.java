@@ -10,7 +10,7 @@ public class Task {
 	public static final int TASK_RECV_MSG = 5;
 	public static final int TASK_RECV_FILE = 6;
 	public static final int MESSAGE_DEVICE_NAME = 9;
-	public static final int TASK_SEND_MSG_FAIL = 10;
+	public static final int TASK_SEND_MSG_FAIL = -1;
 	/** mParam[0]：path */
 	public static final int TASK_SEND_FILE = 7;
 	public static final int TASK_PROGRESS = 8;

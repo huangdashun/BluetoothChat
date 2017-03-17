@@ -38,22 +38,23 @@ public class TaskService extends Service {
     public static final int BT_STAT_CONN = 1;//连接
     public static final int BT_STAT_ONLINE = 2;//在线
     public static final int BT_STAT_UNKNOWN = 3;//未知
+    public static int state = 3;
 
-
+    private final String UUID_STR = "00001101-0000-1000-8000-00805F9B34FB";
     public static final String DEVICE_NAME = "device_name";
 
     private final String TAG = "TaskService";
-    private TaskThread mThread;
+    private TaskThread mThread;//启动任务服务线程
 
     private BluetoothAdapter mBluetoothAdapter;
 
-    private AcceptThread mAcceptThread;
-    private ConnectThread mConnectThread;
-    private ConnectedThread mCommThread;
+    private AcceptThread mAcceptThread;//等待客户端连接线程
+    private ConnectThread mConnectThread;//维持连接的线程
+    private ConnectedThread mConnThread;//作为客户端连接指定的蓝牙设备线程
 
     private boolean isServerMode = true;
 
-    private static Handler mActivityHandler;
+    private static Handler mActivityHandler; //负责更新UI的handler
 
     // 任务队列
     private static ArrayList<Task> mTaskList = new ArrayList<Task>();
@@ -63,30 +64,37 @@ public class TaskService extends Service {
         public void handleMessage(android.os.Message msg) {
             switch (msg.what) {
                 case Task.TASK_GET_REMOTE_STATE:
-                    android.os.Message activityMsg = mActivityHandler.obtainMessage();
-                    activityMsg.what = msg.what;
-                    if (mAcceptThread != null && mAcceptThread.isAlive()) {
-                        activityMsg.obj = "等待连接...";
-                        activityMsg.arg1 = BT_STAT_WAIT;
-                    } else if (mCommThread != null && mCommThread.isAlive()) {
-                        activityMsg.obj = mCommThread.getRemoteName() + "[在线]";
-                        activityMsg.arg1 = BT_STAT_ONLINE;
-                    } else if (mConnectThread != null && mConnectThread.isAlive()) {
-                        SoundEffect.getInstance(TaskService.this).play(3);
-                        activityMsg.obj = "正在连接："
-                                + mConnectThread.getDevice().getName();
-                        activityMsg.arg1 = BT_STAT_CONN;
+                    if (mActivityHandler != null) {
+                        android.os.Message activityMsg = mActivityHandler.obtainMessage();
+                        activityMsg.what = msg.what;
+                        if (mAcceptThread != null && mAcceptThread.isAlive()) {
+                            activityMsg.obj = "等待连接...";
+                            activityMsg.arg1 = BT_STAT_WAIT;
+                        } else if (mConnThread != null && mConnThread.isAlive()) {
+                            activityMsg.obj = mConnThread.getRemoteName() + "[在线]";
+                            activityMsg.arg1 = BT_STAT_ONLINE;
+                        } else if (mConnectThread != null && mConnectThread.isAlive()) {
+                            SoundEffect.getInstance(TaskService.this).play(3);
+                            activityMsg.obj = "正在连接："
+                                    + mConnectThread.getDevice().getName();
+                            activityMsg.arg1 = BT_STAT_CONN;
+
+                        } else {
+                            activityMsg.obj = "对方已经下线";
+                            activityMsg.arg1 = BT_STAT_UNKNOWN;
+                            SoundEffect.getInstance(TaskService.this).play(2);
+                            // 重新等待连接
+                            mAcceptThread = new AcceptThread();
+                            mAcceptThread.start();
+                            isServerMode = true;
+
+                        }
+                        state = activityMsg.arg1;
+                        mActivityHandler.sendMessage(activityMsg);
                     } else {
-                        activityMsg.obj = "未知状态";
-                        activityMsg.arg1 = BT_STAT_UNKNOWN;
-                        SoundEffect.getInstance(TaskService.this).play(2);
-                        // 重新等待连接
-                        mAcceptThread = new AcceptThread();
-                        mAcceptThread.start();
-                        isServerMode = true;
+                        return;
                     }
 
-                    mActivityHandler.sendMessage(activityMsg);
                     break;
                 default:
                     break;
@@ -109,28 +117,30 @@ public class TaskService extends Service {
     }
 
 
-    public static void start(Context c, Handler handler) {
+    public static void start(Context context, Handler handler) {
         mActivityHandler = handler;
-        Intent intent = new Intent(c, TaskService.class);
-        c.startService(intent);
+        Intent intent = new Intent(context, TaskService.class);
+        context.startService(intent);
     }
 
-    public static void stop(Context c) {
-        Intent intent = new Intent(c, TaskService.class);
-        c.stopService(intent);
+    public static void stop(Context context) {
+        Intent intent = new Intent(context, TaskService.class);
+        context.stopService(intent);
     }
 
 
     public static void newTask(Task target) {
         synchronized (mTaskList) {
+            //将任务添加到任务队列中
             mTaskList.add(target);
         }
     }
 
     private class TaskThread extends Thread {
-        private boolean isRun = true;
-        private int mCount = 0;
+        private boolean isRun = true;//判断线程是否还在运行
+        private int mCount = 0;//用来判断线程是否还在运行
 
+        //被调用时.将标记设置为false,表示线程停止运行
         public void cancel() {
             isRun = false;
         }
@@ -138,7 +148,7 @@ public class TaskService extends Service {
         @Override
         public void run() {
             Task task;
-            while (isRun) {
+            while (isRun) {//如果为true
 
                 // 有任务
                 if (mTaskList.size() > 0) {
@@ -168,15 +178,15 @@ public class TaskService extends Service {
 
     }
 
-    //对应三个线程，其中mCommThread是在mConnectThread的run()方法中new出来的
+    //对应三个线程，其中mConnThread是在mConnectThread的run()方法中new出来的
     private void doTask(Task task) {
         switch (task.getTaskID()) {
-            case Task.TASK_START_ACCEPT:
+            case Task.TASK_START_ACCEPT://作为服务器接收等待客户端连接的线程
                 mAcceptThread = new AcceptThread();
                 mAcceptThread.start();
                 isServerMode = true;
                 break;
-            case Task.TASK_START_CONN_THREAD:
+            case Task.TASK_START_CONN_THREAD://作为客户端去连接远程服务器的线程
                 if (task.mParams == null || task.mParams.length == 0) {
                     break;
                 }
@@ -186,22 +196,22 @@ public class TaskService extends Service {
                 isServerMode = false;
                 break;
             case Task.TASK_SEND_MSG:
-                boolean sucess = false;
-                if (mCommThread == null || !mCommThread.isAlive()
+                boolean success = false;
+                if (mConnThread == null || !mConnThread.isAlive()
                         || task.mParams == null || task.mParams.length == 0) {
-                    Log.e(TAG, "mCommThread or task.mParams null");
+                    Log.e(TAG, "mConnThread or task.mParams null");
                 } else {
                     byte[] msg = null;
                     try {
 
                         msg = DataProtocol.packMsg((String) task.mParams[0]);
-                        sucess = mCommThread.write(msg);
+                        success = mConnThread.write(msg);
 
                     } catch (UnsupportedEncodingException e) {
-                        sucess = false;
+                        success = false;
                     }
                 }
-                if (!sucess) {
+                if (!success) {
                     android.os.Message returnMsg = mActivityHandler.obtainMessage();
                     returnMsg.what = Task.TASK_SEND_MSG_FAIL;
                     returnMsg.obj = "消息发送失败";
@@ -220,7 +230,6 @@ public class TaskService extends Service {
         mThread.cancel();
     }
 
-    private final String UUID_STR = "00001101-0000-1000-8000-00805F9B34FB";
 
     /**
      * 等待客户端连接线程
@@ -250,12 +259,13 @@ public class TaskService extends Service {
                     if (mmServerSocket != null) {
                         socket = mmServerSocket.accept();
                     }
-                } catch (IOException e) {
+                } catch (IOException e) {//防止异常结束
                     if (!isCancel) {
                         try {
                             mmServerSocket.close();
                         } catch (IOException e1) {
                         }
+                        //异常结束时,再次监听
                         mAcceptThread = new AcceptThread();
                         mAcceptThread.start();
                         isServerMode = true;
@@ -263,6 +273,7 @@ public class TaskService extends Service {
                     break;
                 }
                 if (socket != null) {
+                    //管理已经连接的客户端
                     manageConnectedSocket(socket);
                     try {
                         mmServerSocket.close();
@@ -281,8 +292,8 @@ public class TaskService extends Service {
                 isServerMode = false;
                 mmServerSocket.close();
                 mAcceptThread = null;
-                if (mCommThread != null && mCommThread.isAlive()) {
-                    mCommThread.cancel();
+                if (mConnThread != null && mConnThread.isAlive()) {
+                    mConnThread.cancel();
                 }
             } catch (IOException e) {
             }
@@ -306,8 +317,8 @@ public class TaskService extends Service {
                 mAcceptThread.cancel();
             }
 
-            if (mCommThread != null && mCommThread.isAlive()) {
-                mCommThread.cancel();
+            if (mConnThread != null && mConnThread.isAlive()) {
+                mConnThread.cancel();
             }
 
             // Use a temporary object that is later assigned to mmSocket,
@@ -359,44 +370,45 @@ public class TaskService extends Service {
         }
     }
 
+    /**
+     * 管理已经连接的客户端
+     *
+     * @param socket
+     */
     private void manageConnectedSocket(BluetoothSocket socket) {
         // 启动子线程来维持连接
-        mCommThread = new ConnectedThread(socket);
-        mCommThread.start();
+        mConnThread = new ConnectedThread(socket);
+        mConnThread.start();
     }
 
     private class ConnectedThread extends Thread {
-        private final BluetoothSocket mmSocket;
-        private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
-        private BufferedOutputStream mmBos;
+        private final BluetoothSocket mSocket;
+        private InputStream mInputStream;
+        private OutputStream mOutStream;
+        private BufferedOutputStream mBos;
         private byte[] buffer;
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(TAG, "ConnectedThread");
-            mmSocket = socket;
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
+            mSocket = socket;
             try {
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
+                mInputStream = socket.getInputStream();
+                mOutStream = socket.getOutputStream();
             } catch (IOException e) {
             }
-            mmInStream = tmpIn;
-            mmOutStream = tmpOut;
-            mmBos = new BufferedOutputStream(mmOutStream);
+            mBos = new BufferedOutputStream(mOutStream);
         }
 
         public OutputStream getOutputStream() {
-            return mmOutStream;
+            return mOutStream;
         }
 
         public boolean write(byte[] msg) {
             if (msg == null)
                 return false;
             try {
-                mmBos.write(msg);
-                mmBos.flush();
+                mBos.write(msg);
+                mBos.flush();
 
                 mActivityHandler.obtainMessage(Task.TASK_SEND_MSG, -1, -1, new String(msg)).sendToTarget();
                 System.out.println("Write:" + msg);
@@ -407,16 +419,16 @@ public class TaskService extends Service {
         }
 
         public String getRemoteName() {
-            return mmSocket.getRemoteDevice().getName();
+            return mSocket.getRemoteDevice().getName();
         }
 
 
         public void cancel() {
             try {
-                mmSocket.close();
+                mSocket.close();
             } catch (IOException e) {
             }
-            mCommThread = null;
+            mConnThread = null;
         }
 
         public void run() {
@@ -431,7 +443,7 @@ public class TaskService extends Service {
             android.os.Message handlerMsg;
             buffer = new byte[1024];
 
-            BufferedInputStream bis = new BufferedInputStream(mmInStream);
+            BufferedInputStream bis = new BufferedInputStream(mInputStream);
             // BufferedReader br = new BufferedReader(new
             // InputStreamReader(mmInStream));
             HashMap<String, Object> data;
@@ -446,7 +458,7 @@ public class TaskService extends Service {
                         return;
                     }
 
-                    msg.remoteDevName = mmSocket.getRemoteDevice().getName();//得到对方设备的名字
+                    msg.remoteDevName = mSocket.getRemoteDevice().getName();//得到对方设备的名字
                     if (msg.type == DataProtocol.TYPE_FILE) {
                         // 文件接收处理忽略
 
@@ -467,10 +479,10 @@ public class TaskService extends Service {
                     }
                 } catch (IOException e) {
                     try {
-                        mmSocket.close();
+                        mSocket.close();
                     } catch (IOException e1) {
                     }
-                    mCommThread = null;
+                    mConnThread = null;
                     if (isServerMode) {
                         // 检查远程设备状态
                         handlerMsg = mServiceHandler.obtainMessage();

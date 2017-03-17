@@ -37,13 +37,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import huangshun.it.com.btproject.DB.DatabaseHelper;
-import huangshun.it.com.btproject.view.ChatListViewAdapter;
-import huangshun.it.com.btproject.sound.SoundEffect;
+import huangshun.it.com.btproject.Model.Emoji;
 import huangshun.it.com.btproject.Model.Task;
 import huangshun.it.com.btproject.service.TaskService;
-import huangshun.it.com.btproject.Model.Emoji;
-import huangshun.it.com.btproject.utils.ToastUtil;
+import huangshun.it.com.btproject.sound.SoundEffect;
 import huangshun.it.com.btproject.utils.NotificationUtil;
+import huangshun.it.com.btproject.utils.ToastUtil;
+import huangshun.it.com.btproject.view.ChatListViewAdapter;
+
+import static huangshun.it.com.btproject.Model.Task.TASK_SEND_MSG_FAIL;
 
 public class ChatActivity extends Activity implements View.OnClickListener {
     private final String TAG = "ChatActivity";
@@ -55,8 +57,9 @@ public class ChatActivity extends Activity implements View.OnClickListener {
 
     private final int REQUES_BT_ENABLE_CODE = 001; //使能蓝牙
     private final int REQUES_SELECT_BT_CODE = 002;//选中设备进行连接
+    //表情包
     private View mEmoView;
-
+    private Emoji mEmoji;
 
     private ListView mList;
     private EditText mInput;
@@ -67,7 +70,6 @@ public class ChatActivity extends Activity implements View.OnClickListener {
     private BluetoothDevice mRemoteDevice;
 
     private LinearLayout mRootLayout, mChatLayout;
-
 
     private boolean isShowEmo = false;
     private boolean isHaspressed = false;
@@ -88,13 +90,14 @@ public class ChatActivity extends Activity implements View.OnClickListener {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
             String pdate = simpleDateFormat.format(System.currentTimeMillis()).toString();
             switch (msg.what) {
-                case -1:
-                    ToastUtil.show(ChatActivity.this, "没有连接其它用户，点击\"Menu\"扫描并选择周国用户");
-                    SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
-                    break;
+                case TASK_SEND_MSG_FAIL://当没有连接用户的时候
+//                    ToastUtil.show(ChatActivity.this, "没有连接其它用户，点击\"Menu\"扫描并选择周国用户");
+//                    SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
+//                    break;
                 case Task.TASK_SEND_MSG:
 //			   showToast(msg.obj.toString());
                     String writeMessage = msg.obj.toString();
+
                     if (writeMessage != null && isHaspressed) {
                         //将发送的信息插入到数据库
                         ContentValues values = new ContentValues();
@@ -144,7 +147,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
             }
         }
     };
-    private Emoji mEmoji;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -228,9 +231,12 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         mEmoButton.setOnClickListener(this);
     }
 
-
+    /**
+     * 作为服务器开启服务
+     */
     private void startServiceAsServer() {
-        TaskService.start(this, mHandler);
+        TaskService.start(this, mHandler);//初始化任务服务
+        //向后台服务提交一个任务,作为服务器端监听远程的设备连接
         TaskService.newTask(new Task(mHandler, Task.TASK_START_ACCEPT, null));
         SoundEffect.getInstance(this).play(SoundEffect.SOUND_PLAY);
     }
@@ -260,32 +266,43 @@ public class ChatActivity extends Activity implements View.OnClickListener {
 
     @Override
     public void onClick(View v) {
-        if (v == mSendBtn) {
-            String msg = mInput.getText().toString().trim();
-            TaskService.newTask(new Task(mHandler, Task.TASK_GET_REMOTE_STATE, null));//通过点击按钮触发相应线程的启动，比较巧妙，值得学习
-            if (msg.length() == 0) {
-                ToastUtil.show(ChatActivity.this, "聊天内容为空");
-                SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
-                return;
-            }
-
-            //------ DEUBG ------
-            TaskService.newTask(new Task(mHandler, Task.TASK_SEND_MSG, new Object[]{msg}));
-            showOwnMessage(msg);//立马显示自己发送的消息，所以在handler里面就没有再做处理
-            isHaspressed = true;//数据库可以开始记录消息啦
-            mInput.setText("");
-        } else if (v == mEmoButton) {
-            System.out.println("Emo btn clicked");
-            // 关闭输入法
-            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
-            if (isShowEmo) {
-                showEmoPanel(false);
-            } else {
-                showEmoPanel(true);
-            }
+        switch (v.getId()) {
+            case R.id.sendBtn:
+                if (TaskService.state == TaskService.BT_STAT_ONLINE) {//并且如果是在线状态的话
+                    String msg = mInput.getText().toString().trim();
+                    TaskService.newTask(new Task(mHandler, Task.TASK_GET_REMOTE_STATE, null));//通过点击按钮触发相应线程的启动，比较巧妙，值得学习
+                    if (msg.length() == 0) {
+                        ToastUtil.show(ChatActivity.this, "聊天内容为空");
+                        SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
+                        return;
+                    }
+                    //------ DEUBG ------
+                    TaskService.newTask(new Task(mHandler, Task.TASK_SEND_MSG, new Object[]{msg}));
+                    showOwnMessage(msg);//立马显示自己发送的消息，所以在handler里面就没有再做处理
+                    isHaspressed = true;//数据库可以开始记录消息啦
+                    mInput.setText("");
+                } else {
+                    ToastUtil.show(ChatActivity.this, "没有连接其它用户，点击\"Menu\"扫描并选择周国用户");
+                    SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
+                    break;
+                }
+                break;
+            case R.id.emotionBtn:
+                System.out.println("Emo btn clicked");
+                // 关闭输入法
+                InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(mInput.getWindowToken(), 0);
+                if (isShowEmo) {
+                    showEmoPanel(false);
+                } else {
+                    showEmoPanel(true);
+                }
+                break;
         }
+
+
     }
+
 
     /**
      * 显示或隐藏表情面板

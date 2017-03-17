@@ -102,9 +102,9 @@ public class Emoji {
 
         float density = dm.density;      // 屏幕密度（像素比例：0.75/1.0/1.5/2.0）
 
-        int readlViewWidht = 56;
+        int readlViewWidth = 56;
         // 图片都放在了Hdpi中，所以计算出图片的像素独立宽度
-        int viewWidth = (int) (readlViewWidht * density / 1.5);
+        int viewWidth = (int) (readlViewWidth * density / 1.5);
         int viewHeight = viewWidth;
         System.out.println("viewWidth:" + viewWidth + " viewHeight:" + viewHeight);
 
