@@ -21,7 +21,7 @@ public class DataProtocol {
 		buf[1] = TYPE_MSG;
 		buf[2] = hiLen;
 		buf[3] = lowLen;
-		System.arraycopy(msgbytes, 0, buf, 4, msgbytes.length);
+		System.arraycopy(msgbytes, 0, buf, 4, msgbytes.length);//实现数组之间的复制
 		return buf;
 	}
 	

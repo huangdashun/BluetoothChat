@@ -190,8 +190,8 @@ public class TaskService extends Service {
                 if (task.mParams == null || task.mParams.length == 0) {
                     break;
                 }
-                BluetoothDevice remote = (BluetoothDevice) task.mParams[0];
-                mConnectThread = new ConnectThread(remote);
+                BluetoothDevice remoteDevice = (BluetoothDevice) task.mParams[0];
+                mConnectThread = new ConnectThread(remoteDevice);
                 mConnectThread.start();
                 isServerMode = false;
                 break;
@@ -201,7 +201,7 @@ public class TaskService extends Service {
                         || task.mParams == null || task.mParams.length == 0) {
                     Log.e(TAG, "mConnThread or task.mParams null");
                 } else {
-                    byte[] msg = null;
+                    byte[] msg;
                     try {
 
                         msg = DataProtocol.packMsg((String) task.mParams[0]);
@@ -306,33 +306,31 @@ public class TaskService extends Service {
      * @author Administrator
      */
     private class ConnectThread extends Thread {
-        private final BluetoothSocket mmSocket;
-        private final BluetoothDevice mmDevice;
+        private BluetoothSocket mmSocket;
+        private BluetoothDevice mmDevice;
 
         public ConnectThread(BluetoothDevice device) {
 
             Log.d(TAG, "ConnectThread");
 
-            if (mAcceptThread != null && mAcceptThread.isAlive()) {
+            if (mAcceptThread != null && mAcceptThread.isAlive()) {//关闭接收其他设备连接该设备的线程
                 mAcceptThread.cancel();
             }
 
-            if (mConnThread != null && mConnThread.isAlive()) {
+            if (mConnThread != null && mConnThread.isAlive()) {//关闭之前维持连接的线程(因为已经连接成功新的设备)
                 mConnThread.cancel();
             }
 
             // Use a temporary object that is later assigned to mmSocket,
             // because mmSocket is final
-            BluetoothSocket tmp = null;
             mmDevice = device;
             try {
-                tmp = device.createRfcommSocketToServiceRecord(UUID
+                mmSocket = device.createRfcommSocketToServiceRecord(UUID
                         .fromString(UUID_STR));
             } catch (IOException e) {
                 Log.d(TAG, "createRfcommSocketToServiceRecord error!");
             }
 
-            mmSocket = tmp;
         }
 
         public BluetoothDevice getDevice() {
@@ -381,6 +379,9 @@ public class TaskService extends Service {
         mConnThread.start();
     }
 
+    /**
+     * 维持连接的线程
+     */
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mSocket;
         private InputStream mInputStream;
@@ -403,6 +404,12 @@ public class TaskService extends Service {
             return mOutStream;
         }
 
+        /**
+         * 将要发送的内容写入输出流
+         *
+         * @param msg
+         * @return
+         */
         public boolean write(byte[] msg) {
             if (msg == null)
                 return false;
@@ -418,6 +425,7 @@ public class TaskService extends Service {
             return true;
         }
 
+        //获取远程设备的名字
         public String getRemoteName() {
             return mSocket.getRemoteDevice().getName();
         }
@@ -463,7 +471,7 @@ public class TaskService extends Service {
                         // 文件接收处理忽略
 
                     } else if (msg.type == DataProtocol.TYPE_MSG) {
-                        data = new HashMap<String, Object>();
+                        data = new HashMap<>();
                         System.out.println("Read data.");
                         data.put(ChatListViewAdapter.KEY_ROLE,
                                 ChatListViewAdapter.ROLE_TARGET);

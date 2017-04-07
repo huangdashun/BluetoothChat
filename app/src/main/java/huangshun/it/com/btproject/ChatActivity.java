@@ -2,13 +2,10 @@ package huangshun.it.com.btproject;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
@@ -18,18 +15,18 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.LinearLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
@@ -50,7 +47,6 @@ import static huangshun.it.com.btproject.Model.Task.TASK_SEND_MSG_FAIL;
 public class ChatActivity extends Activity implements View.OnClickListener {
     private final String TAG = "ChatActivity";
     public static int sAliveCount = 0;
-    public static final String EXTRA_MESSAGER = "cn.com.farsgiht.bluetoothdemo.BUNDLE";
     public static final String DEVICE_NAME = "device_name";
     // 蓝牙状态变量
     private static int sBTState = -1;
@@ -65,6 +61,9 @@ public class ChatActivity extends Activity implements View.OnClickListener {
     private EditText mInput;
     private Button mSendBtn;
     private ImageView mEmoButton;
+    private TextView mTvState;
+    private ImageButton mImageAddButton;
+    private ImageButton mImageSearchButton;
 
     private boolean isUpdate = false;
     private BluetoothDevice mRemoteDevice;
@@ -76,7 +75,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
 
 
     private ChatListViewAdapter mChatListAdapter;
-    private ArrayList<HashMap<String, Object>> mChatContentData = new ArrayList<HashMap<String, Object>>();
+    private ArrayList<HashMap<String, Object>> mChatContentData = new ArrayList<>();
     private BluetoothAdapter mBluetoothAdapter;
 
 
@@ -137,7 +136,8 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                     }
                     break;
                 case Task.TASK_GET_REMOTE_STATE:
-                    setTitle((String) msg.obj);
+//                    setTitle((String) msg.obj);
+                    mTvState.setText((String) msg.obj);
                     if (sAliveCount <= 0) {
                         if (isBTStateChanged(msg.arg1) && msg.arg1 != TaskService.BT_STAT_WAIT)
                             NotificationUtil.notifyMessage(ChatActivity.this, (String) msg.obj, ChatActivity.this);
@@ -189,7 +189,9 @@ public class ChatActivity extends Activity implements View.OnClickListener {
      * 初始化view
      */
     private void initView() {
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_chat);
+        mTvState = (TextView) findViewById(R.id.tv_state);
         mRootLayout = (LinearLayout) findViewById(R.id.root);
         mChatLayout = (LinearLayout) findViewById(R.id.topPanel);
         mList = (ListView) findViewById(R.id.lv_chat);//聊天的列表
@@ -197,7 +199,10 @@ public class ChatActivity extends Activity implements View.OnClickListener {
 
         mSendBtn = (Button) findViewById(R.id.sendBtn);
         mEmoButton = (ImageView) findViewById(R.id.emotionBtn);
-
+        //弹出下拉框
+        mImageAddButton = (ImageButton) findViewById(R.id.imb_top_add);
+        //扫描
+        mImageSearchButton = (ImageButton) findViewById(R.id.imb_top_search);
         //初始化表情类
         mEmoji = new Emoji(this);
         // 初始化表情
@@ -229,6 +234,8 @@ public class ChatActivity extends Activity implements View.OnClickListener {
 
         mSendBtn.setOnClickListener(this);
         mEmoButton.setOnClickListener(this);
+        mImageAddButton.setOnClickListener(this);
+        mImageSearchButton.setOnClickListener(this);
     }
 
     /**
@@ -282,7 +289,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                     isHaspressed = true;//数据库可以开始记录消息啦
                     mInput.setText("");
                 } else {
-                    ToastUtil.show(ChatActivity.this, "没有连接其它用户，点击\"Menu\"扫描并选择周国用户");
+                    ToastUtil.show(ChatActivity.this, "没有连接其它用户，请先扫描并选择周围用户");
                     SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
                     break;
                 }
@@ -297,6 +304,12 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                 } else {
                     showEmoPanel(true);
                 }
+                break;
+            case R.id.imb_top_add://弹出下拉框
+                startActivity(new Intent(ChatActivity.this, PopDialogActivity.class));
+                break;
+            case R.id.imb_top_search://扫描设备
+                startActivityForResult(new Intent(this, SelectDeviceActivity.class), REQUES_SELECT_BT_CODE);
                 break;
         }
 
@@ -373,59 +386,6 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         mChatContentData.add(map);
         mChatListAdapter.notifyDataSetChanged();
         SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_SEND);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.option_menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.scan:
-                startActivityForResult(new Intent(this, SelectDevice.class), REQUES_SELECT_BT_CODE);
-                break;
-            case R.id.discoverable:
-                // 调用设置用户名方法
-                AlertDialog.Builder dlg = new AlertDialog.Builder(this);
-                final EditText devNameEdit = new EditText(this);
-                dlg.setView(devNameEdit);
-                dlg.setTitle("请输入用户名");
-                dlg.setPositiveButton("设置", new OnClickListener() {
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (devNameEdit.getText().toString().length() != 0)
-                            mBluetoothAdapter.setName(devNameEdit.getText().toString());
-                    }
-                });
-                dlg.create();
-                dlg.show();
-                return true;
-            case R.id.record:
-                Intent recordIntent = new Intent(ChatActivity.this, RecordListActivity.class);
-                startActivity(recordIntent);
-                return true;
-            case R.id.exit:
-//	        	Intent aboutIntent = new Intent(ChatActivity.this, DownloadActivity.class);
-//	            startActivity(aboutIntent);
-                ensureDiscoverable();
-                return true;
-        }
-        return false;
-    }
-
-    /**
-     * 让本设备可见
-     */
-    private void ensureDiscoverable() {
-        if (mBluetoothAdapter.getScanMode() !=
-                BluetoothAdapter.SCAN_MODE_CONNECTABLE_DISCOVERABLE) {
-            Intent discoverableIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-            discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-            startActivity(discoverableIntent);
-        }
     }
 
     @Override

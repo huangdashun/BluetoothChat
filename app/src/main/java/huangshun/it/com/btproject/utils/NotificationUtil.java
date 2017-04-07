@@ -20,11 +20,12 @@ public class NotificationUtil {
 		nm = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
 		// 消息对象
         Intent notificationIntent = new Intent(context, activity.getClass());
+		notificationIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
         // PendingIntent.getActivity(Context context, int requestCode, Intent intent, int flags)
         // 用来获得一个挂起的PendingIntent，让该Intent去启动新的Activity来处理通知
         contentIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0); 
 
-        
+
         //定义通知栏展现的内容信息
         int icon = R.drawable.icon;
         long when = System.currentTimeMillis();
