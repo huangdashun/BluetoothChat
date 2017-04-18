@@ -31,7 +31,7 @@ import huangshun.it.com.btproject.sound.SoundEffect;
 /**
  * 任务处理服务
  *
- * @author Administrator
+ * Created by hs on 2017/3/25.
  */
 public class TaskService extends Service {
     public static final int BT_STAT_WAIT = 0;//等待

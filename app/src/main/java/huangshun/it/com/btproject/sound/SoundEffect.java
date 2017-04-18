@@ -9,6 +9,9 @@ import java.util.HashMap;
 
 import huangshun.it.com.btproject.R;
 
+/**
+ * Created by hs on 2017/3/25.
+ */
 public class SoundEffect implements OnLoadCompleteListener {
 	public static final int SOUND_SEND = 0;
 	public static final int SOUND_RECV = 1;

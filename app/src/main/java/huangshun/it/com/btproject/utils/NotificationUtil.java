@@ -9,6 +9,9 @@ import android.content.Intent;
 
 import huangshun.it.com.btproject.R;
 
+/**
+ * Created by hs on 2017/3/27.
+ */
 public class NotificationUtil {
     public static final int NOTIFY_ID1 = 1001;
 

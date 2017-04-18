@@ -3,11 +3,10 @@ package huangshun.it.com.btproject.view;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.widget.ImageView;
 
 import huangshun.it.com.btproject.R;
 
-public class PageIndicatorView extends ImageView {
+public class PageIndicatorView extends android.support.v7.widget.AppCompatImageView {
 
 	public PageIndicatorView(Context context) {
 		super(context);

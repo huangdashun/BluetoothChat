@@ -4,7 +4,7 @@ import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
 
-public class TextViewItem extends TextView {
+public class TextViewItem extends android.support.v7.widget.AppCompatTextView {
 	public static final int ROLE_OWN = 1;
 	public static final int ROLE_TARGET = 2;
 	public static final int ROLE_OTHER = 3;

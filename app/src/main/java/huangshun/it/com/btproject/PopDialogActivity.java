@@ -22,6 +22,9 @@ import android.widget.Toast;
 
 import huangshun.it.com.btproject.utils.ToastUtil;
 
+/**
+ * Created by hs on 2017/3/27.
+ */
 public class PopDialogActivity extends Activity implements OnClickListener {
     private static final String TAG = "PopDialogActivity";
     private LinearLayout mDeviceVisible;

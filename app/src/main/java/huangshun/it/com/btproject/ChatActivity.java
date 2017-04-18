@@ -44,6 +44,9 @@ import huangshun.it.com.btproject.view.ChatListViewAdapter;
 
 import static huangshun.it.com.btproject.Model.Task.TASK_SEND_MSG_FAIL;
 
+/**
+ * Created by hs on 2017/3/27.
+ */
 public class ChatActivity extends Activity implements View.OnClickListener {
     private final String TAG = "ChatActivity";
     public static int sAliveCount = 0;
@@ -87,7 +90,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         public void handleMessage(Message msg) {
             //设置聊天信息的时间
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
-            String pdate = simpleDateFormat.format(System.currentTimeMillis()).toString();
+            String date = simpleDateFormat.format(System.currentTimeMillis()).toString();
             switch (msg.what) {
                 case TASK_SEND_MSG_FAIL://当没有连接用户的时候
 //                    ToastUtil.show(ChatActivity.this, "没有连接其它用户，点击\"Menu\"扫描并选择周国用户");
@@ -101,12 +104,12 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                         //将发送的信息插入到数据库
                         ContentValues values = new ContentValues();
                         values.put("name", "我");
-                        values.put("pdate", pdate);
-                        values.put("informations", writeMessage);
+                        values.put("date", date);
+                        values.put("information", writeMessage);
                         //创建数据库
-                        DatabaseHelper insertdbHelper = new DatabaseHelper(ChatActivity.this, "zhsf_db");
-                        SQLiteDatabase insertdb = insertdbHelper.getWritableDatabase();
-                        insertdb.insert("info", null, values);
+                        DatabaseHelper insertDbHelper = new DatabaseHelper(ChatActivity.this, "record_db");
+                        SQLiteDatabase insertDb = insertDbHelper.getWritableDatabase();
+                        insertDb.insert("info", null, values);
                     }
                     if (sAliveCount <= 0) {
                         NotificationUtil.notifyMessage(ChatActivity.this, msg.obj.toString(), ChatActivity.this);
@@ -119,11 +122,11 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                         //将接受的信息插入到数据库
                         ContentValues values2 = new ContentValues();
                         values2.put("name", mConnectedDeviceName);
-                        values2.put("pdate", pdate);
-                        values2.put("informations", readMessage);
-                        DatabaseHelper insertdbHelper2 = new DatabaseHelper(ChatActivity.this, "zhsf_db");
-                        SQLiteDatabase insertdb2 = insertdbHelper2.getWritableDatabase();
-                        insertdb2.insert("info", null, values2);
+                        values2.put("date", date);
+                        values2.put("information", readMessage);
+                        DatabaseHelper insertDbHelper = new DatabaseHelper(ChatActivity.this, "record_db");
+                        SQLiteDatabase insertDb = insertDbHelper.getWritableDatabase();
+                        insertDb.insert("info", null, values2);
                     }
 
                     if (msg.obj == null)
@@ -160,7 +163,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
             Log.e(TAG, "Your device is not support Bluetooth!");
-            Toast.makeText(this, "该设备没有蓝牙设备", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "该设备不支持蓝牙设备", Toast.LENGTH_LONG).show();
             return;
         }
 

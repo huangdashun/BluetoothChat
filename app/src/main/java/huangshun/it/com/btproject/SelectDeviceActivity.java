@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -17,6 +16,7 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -28,14 +28,14 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
     private ListView mDevList;
 
     private ArrayAdapter<String> adapter;
-    private ArrayList<String> mArrayAdapter = new ArrayList<String>();
-    private ArrayList<BluetoothDevice> mDeviceList = new ArrayList<BluetoothDevice>();
+    private ArrayList<String> mDeviceNameList = new ArrayList<>();
+    private ArrayList<BluetoothDevice> mDeviceList = new ArrayList<>();
+    private int requestBluCode = 1;//请求打开蓝牙的请求码
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-//		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_scan_device);
 
@@ -46,17 +46,16 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
         mScanBtn = (Button) findViewById(R.id.scanBtn);
         mScanBtn.setOnClickListener(this);
 
-        adapter = new ArrayAdapter<String>(
+        adapter = new ArrayAdapter<>(
                 this,
                 android.R.layout.simple_list_item_1,
-                mArrayAdapter);
+                mDeviceNameList);
 
         mDevList.setAdapter(adapter);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
-            // Device does not support Bluetooth
-            Log.e(TAG, "Your device is not support Bluetooth!");
+            Toast.makeText(this, "该设备不支持蓝牙设备", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -64,13 +63,13 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
         if (!mBluetoothAdapter.isEnabled()) {
             // 请求打开蓝牙设备
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, 21);
+            startActivityForResult(enableBtIntent, requestBluCode);
         } else {
             findDevice();
         }
 
 
-        // Register the BroadcastReceiver
+        // 注册广播
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
         registerReceiver(mReceiver, filter);
@@ -88,20 +87,20 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
         super.onPause();
     }
 
-    // Create a BroadcastReceiver for ACTION_FOUND
+    // 创建一个发现蓝牙设备的广播接收者
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
-            // When discovery finds a device
+            // 当发现设备时
             if (BluetoothDevice.ACTION_FOUND.equals(action)) {
-                // Get the BluetoothDevice object from the Intent
+                // 获取蓝牙设备
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 // 已包含该设备
                 if (mDeviceList.contains(device)) {
                     return;
                 }
-                // Add the name and address to an array adapter to show in a ListView
-                mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                // 添加蓝牙设备信息
+                mDeviceNameList.add(device.getName() + "\n" + device.getAddress());
                 System.out.println(device.getName() + "\n" + device.getAddress());
                 mDeviceList.add(device);
                 adapter.notifyDataSetChanged();
@@ -125,14 +124,13 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
     }
 
     private void findDevice() {
-        // 获得已经保存的配对设备
+        // 获得已经保存的配对设备(如果蓝牙未开启,那么会返回一个空集合)
         Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-        // If there are paired devices
+        // 如果有配对的设备
         if (pairedDevices.size() > 0) {
-            // Loop through paired devices
+            // 获取¬配对的设备
             for (BluetoothDevice device : pairedDevices) {
-                // Add the name and address to an array adapter to show in a ListView
-                mArrayAdapter.add(device.getName() + "\n" + device.getAddress());
+                mDeviceNameList.add(device.getName() + "\n" + device.getAddress());
                 mDeviceList.add(device);
             }
         }
@@ -142,7 +140,7 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == 21) {
+        if (requestCode == requestBluCode) {
             if (resultCode == RESULT_OK) {
                 System.out.println("设备打开成功");
                 findDevice();
@@ -160,7 +158,7 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
 
     @Override
     public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
-        String targetDev = mArrayAdapter.get(arg2);
+        String targetDev = mDeviceNameList.get(arg2);
         System.out.println(targetDev);
         // 将点击的设备对象保存到Intent中，交给ChatActivity
         Intent data = new Intent();

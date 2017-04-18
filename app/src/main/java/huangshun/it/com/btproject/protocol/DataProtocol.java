@@ -4,7 +4,7 @@ import java.io.UnsupportedEncodingException;
 
 /**
  * 
- * @author Micheal
+ * Created by hs on 2017/3/23.
  *
  */
 public class DataProtocol {

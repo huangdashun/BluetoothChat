@@ -19,72 +19,72 @@ import android.widget.ListView;
 
 import huangshun.it.com.btproject.DB.DatabaseHelper;
 
-public class RecordListActivity extends Activity{
-	private ArrayAdapter<CharSequence> queryArrayAdapter;
-	private ListView queryListView;
-	private DisplayMetrics dm;
-	
-	protected void onCreate(Bundle savedInstanceState) {
+public class RecordListActivity extends Activity {
+    private ArrayAdapter<CharSequence> queryArrayAdapter;
+    private ListView queryListView;
+    private DisplayMetrics dm;
+
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.record_list);
-        
+
         dm = new DisplayMetrics();
-		getWindowManager().getDefaultDisplay().getMetrics(dm); 
-        
-        DatabaseHelper dbHelper=new DatabaseHelper(RecordListActivity.this,"zhsf_db");
-		SQLiteDatabase db=dbHelper.getReadableDatabase();
-		//Cursor cursor=db.query("info",new String[]{"name","informations","pdate"},"name=?",new String[]{"zhouzhou"}, null,null,null);
-		Cursor cursor=db.query("info",new String[]{"name","informations","pdate"},null,null, null,null,null);
-		queryArrayAdapter = new ArrayAdapter<CharSequence >(RecordListActivity.this, R.layout.information);
-		queryListView = (ListView) findViewById(R.id.query);
-		queryListView.setAdapter(queryArrayAdapter);
-	    while(cursor.moveToNext()){
-			String name=cursor.getString(cursor.getColumnIndex("name"));
-			String informations=cursor.getString(cursor.getColumnIndex("informations"));
-			String pdate=cursor.getString(cursor.getColumnIndex("pdate"));
-			System.out.print("@name--->"+name);
-		    System.out.print("@informations--->"+informations);
-			System.out.println("@pdate--->"+pdate);
-			queryArrayAdapter.add(name+"    "+pdate);
-			Spanned spann2 = makeChatContent(informations);
-			queryArrayAdapter.add(spann2);
-			
-	    }
-        
-        Button returnButton=(Button)findViewById(R.id.returnButton);
+        getWindowManager().getDefaultDisplay().getMetrics(dm);
+
+        DatabaseHelper dbHelper = new DatabaseHelper(RecordListActivity.this, "record_db");
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        //Cursor cursor=db.query("info",new String[]{"name","informations","pdate"},"name=?",new String[]{"zhouzhou"}, null,null,null);
+        Cursor cursor = db.query("info", new String[]{"name", "information", "date"}, null, null, null, null, null);
+        queryArrayAdapter = new ArrayAdapter<>(RecordListActivity.this, R.layout.information);
+        queryListView = (ListView) findViewById(R.id.lv_query);
+        queryListView.setAdapter(queryArrayAdapter);
+        while (cursor.moveToNext()) {
+            String name = cursor.getString(cursor.getColumnIndex("name"));
+            String information = cursor.getString(cursor.getColumnIndex("information"));
+            String date = cursor.getString(cursor.getColumnIndex("date"));
+            System.out.print("@name--->" + name);
+            System.out.print("@information--->" + information);
+            System.out.println("@date--->" + date);
+            queryArrayAdapter.add(name + "    " + date);
+            Spanned spann2 = makeChatContent(information);
+            queryArrayAdapter.add(spann2);
+
+        }
+
+        Button returnButton = (Button) findViewById(R.id.return_button);
         returnButton.setOnClickListener(new OnClickListener() {
             public void onClick(View v) {
-            	Intent recordIntent = new Intent(RecordListActivity.this,ChatActivity.class);
-                startActivity(recordIntent);  
+                Intent recordIntent = new Intent(RecordListActivity.this, ChatActivity.class);
+                startActivity(recordIntent);
             }
         });
-	}
-	
-	//<emo001]
-	private Spanned makeChatContent(String msg){
-		String htmlStr = msg;
-		while(true){
-			int start = htmlStr.indexOf("<emo", 0);
-			if(start != -1){
-				String resIdStr = htmlStr.substring(start+1,start + 7);
-				htmlStr = htmlStr.replaceFirst("<emo...>", "<img src='" + resIdStr +"'/>");
-			}else{
-				return Html.fromHtml(htmlStr, imgGetter, null);
-			}
-		}
-	}
-	
-	private ImageGetter imgGetter = new ImageGetter() {
-		@Override
-		public Drawable getDrawable(String source) {
-			int resID =  getResources().getIdentifier(source, "drawable", getPackageName());
-			Drawable drawable = getResources().getDrawable(resID);
-			int w = (int) (drawable.getIntrinsicWidth() * dm.density / 2);
-			int h = (int) (drawable.getIntrinsicHeight() * dm.density / 2);
-			drawable.setBounds(0, 0, w , h);
-			return drawable;
-		}
-	};
-	
+    }
+
+    //<emo001>
+    private Spanned makeChatContent(String msg) {
+        String htmlStr = msg;
+        while (true) {
+            int start = htmlStr.indexOf("<emo", 0);
+            if (start != -1) {
+                String resIdStr = htmlStr.substring(start + 1, start + 7);
+                htmlStr = htmlStr.replaceFirst("<emo...>", "<img src='" + resIdStr + "'/>");//正则 .匹配除“\r\n”之外的任何单个字符
+            } else {
+                return Html.fromHtml(htmlStr, imgGetter, null);
+            }
+        }
+    }
+
+    private ImageGetter imgGetter = new ImageGetter() {
+        @Override
+        public Drawable getDrawable(String source) {
+            int resID = getResources().getIdentifier(source, "drawable", getPackageName());//获得应用包下的指定ID
+            Drawable drawable = getResources().getDrawable(resID);
+            int w = (int) (drawable.getIntrinsicWidth() * dm.density / 2);
+            int h = (int) (drawable.getIntrinsicHeight() * dm.density / 2);
+            drawable.setBounds(0, 0, w, h);
+            return drawable;
+        }
+    };
+
 }
