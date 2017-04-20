@@ -11,10 +11,8 @@ import android.text.method.HideReturnsTransformationMethod;
 import android.text.method.PasswordTransformationMethod;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.RelativeLayout;
@@ -164,23 +162,6 @@ public class ChatListViewAdapter extends BaseAdapter {
         return rLayout;
     }
 
-    private class TouchListener implements OnTouchListener {
-        private TextView mView;
-
-        public TouchListener(TextView v) {
-            mView = v;
-        }
-
-        @Override
-        public boolean onTouch(View v, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                mView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
-            } else if (event.getAction() == MotionEvent.ACTION_UP || event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                mView.setTransformationMethod(PasswordTransformationMethod.getInstance());
-            }
-            return true;
-        }
-    }
 
     private class ClickListener implements OnClickListener {
         private TextView mView;
@@ -204,10 +185,10 @@ public class ChatListViewAdapter extends BaseAdapter {
             int pos = holder.getPosition();
             boolean isShow = (Boolean) mDatalist.get(pos).get(KEY_SHOW_MSG);
             if (isShow) {
-                mView.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                mView.setTransformationMethod(PasswordTransformationMethod.getInstance());//设置隐藏内容
                 mDatalist.get(pos).put(KEY_SHOW_MSG, false);
             } else {
-                mView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());
+                mView.setTransformationMethod(HideReturnsTransformationMethod.getInstance());//显示内容
                 mDatalist.get(pos).put(KEY_SHOW_MSG, true);
             }
         }
