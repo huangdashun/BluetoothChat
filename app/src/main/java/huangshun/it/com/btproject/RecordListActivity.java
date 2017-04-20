@@ -4,12 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.Html;
-import android.text.Html.ImageGetter;
 import android.text.Spanned;
-import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -18,20 +14,17 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import huangshun.it.com.btproject.DB.DatabaseHelper;
+import huangshun.it.com.btproject.utils.EmoContentUtil;
 
 public class RecordListActivity extends Activity {
     private ArrayAdapter<CharSequence> queryArrayAdapter;
     private ListView queryListView;
-    private DisplayMetrics dm;
+
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.record_list);
-
-        dm = new DisplayMetrics();
-        getWindowManager().getDefaultDisplay().getMetrics(dm);
-
         DatabaseHelper dbHelper = new DatabaseHelper(RecordListActivity.this, "record_db");
         SQLiteDatabase db = dbHelper.getReadableDatabase();
         //Cursor cursor=db.query("info",new String[]{"name","informations","pdate"},"name=?",new String[]{"zhouzhou"}, null,null,null);
@@ -47,7 +40,7 @@ public class RecordListActivity extends Activity {
             System.out.print("@information--->" + information);
             System.out.println("@date--->" + date);
             queryArrayAdapter.add(name + "    " + date);
-            Spanned spann2 = makeChatContent(information);
+            Spanned spann2 = EmoContentUtil.getInstance(this).getEmoContent(information);
             queryArrayAdapter.add(spann2);
 
         }
@@ -61,30 +54,5 @@ public class RecordListActivity extends Activity {
         });
     }
 
-    //<emo001>
-    private Spanned makeChatContent(String msg) {
-        String htmlStr = msg;
-        while (true) {
-            int start = htmlStr.indexOf("<emo", 0);
-            if (start != -1) {
-                String resIdStr = htmlStr.substring(start + 1, start + 7);
-                htmlStr = htmlStr.replaceFirst("<emo...>", "<img src='" + resIdStr + "'/>");//正则 .匹配除“\r\n”之外的任何单个字符
-            } else {
-                return Html.fromHtml(htmlStr, imgGetter, null);
-            }
-        }
-    }
-
-    private ImageGetter imgGetter = new ImageGetter() {
-        @Override
-        public Drawable getDrawable(String source) {
-            int resID = getResources().getIdentifier(source, "drawable", getPackageName());//获得应用包下的指定ID
-            Drawable drawable = getResources().getDrawable(resID);
-            int w = (int) (drawable.getIntrinsicWidth() * dm.density / 2);
-            int h = (int) (drawable.getIntrinsicHeight() * dm.density / 2);
-            drawable.setBounds(0, 0, w, h);
-            return drawable;
-        }
-    };
 
 }
