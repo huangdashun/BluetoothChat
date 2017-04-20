@@ -67,18 +67,16 @@ public class ChatActivity extends Activity implements View.OnClickListener {
     private TextView mTvState;
     private ImageButton mImageAddButton;
     private ImageButton mImageSearchButton;
-
-    private boolean isUpdate = false;
     private BluetoothDevice mRemoteDevice;
 
     private LinearLayout mRootLayout, mChatLayout;
-
-    private boolean isShowEmo = false;
-    private boolean isHaspressed = false;
+    private boolean isUpdate = false;//用来第一次加载表情view
+    private boolean isShowEmo = false;//是否已经展示表情包
+    private boolean isMaySave = false;//是否可以将聊天记录存入数据库
 
 
     private ChatListViewAdapter mChatListAdapter;
-    private ArrayList<HashMap<String, Object>> mChatContentData = new ArrayList<>();
+    private ArrayList<HashMap<String, Object>> mChatContentData = new ArrayList<>();//存放聊天内容的集合
     private BluetoothAdapter mBluetoothAdapter;
 
 
@@ -96,11 +94,11 @@ public class ChatActivity extends Activity implements View.OnClickListener {
 //                    ToastUtil.show(ChatActivity.this, "没有连接其它用户，点击\"Menu\"扫描并选择周国用户");
 //                    SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
 //                    break;
-                case Task.TASK_SEND_MSG:
+                case Task.TASK_SEND_MSG://发送信息
 //			   showToast(msg.obj.toString());
                     String writeMessage = msg.obj.toString();
 
-                    if (writeMessage != null && isHaspressed) {
+                    if (writeMessage != null && isMaySave) {
                         //将发送的信息插入到数据库
                         ContentValues values = new ContentValues();
                         values.put("name", "我");
@@ -112,6 +110,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                         insertDb.insert("info", null, values);
                     }
                     if (sAliveCount <= 0) {
+                        Log.i(TAG, "sAliveCount:" + sAliveCount + " send_msg");
                         NotificationUtil.notifyMessage(ChatActivity.this, msg.obj.toString(), ChatActivity.this);
                     }
                     break;
@@ -119,7 +118,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                     String readMessage = ((HashMap<String, Object>) msg.obj).get(ChatListViewAdapter.KEY_TEXT).toString();
                     mConnectedDeviceName = ((HashMap<String, Object>) msg.obj).get(ChatListViewAdapter.KEY_NAME).toString();
                     if (readMessage != null) {
-                        //将接受的信息插入到数据库
+                        //将接收的信息插入到数据库
                         ContentValues values2 = new ContentValues();
                         values2.put("name", mConnectedDeviceName);
                         values2.put("date", date);
@@ -138,9 +137,8 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                         NotificationUtil.notifyMessage(ChatActivity.this, "您有未读取消息", ChatActivity.this);
                     }
                     break;
-                case Task.TASK_GET_REMOTE_STATE:
-//                    setTitle((String) msg.obj);
-                    mTvState.setText((String) msg.obj);
+                case Task.TASK_GET_REMOTE_STATE://获取远程连接的状态
+                    mTvState.setText((String) msg.obj);//设置连接的状态
                     if (sAliveCount <= 0) {
                         if (isBTStateChanged(msg.arg1) && msg.arg1 != TaskService.BT_STAT_WAIT)
                             NotificationUtil.notifyMessage(ChatActivity.this, (String) msg.obj, ChatActivity.this);
@@ -171,7 +169,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
          * 安卓从6.0开始有了运行时权限
          */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // Android M Permission check
+            // Android6.0运行时权限检查
             if (this.checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
             }
@@ -194,14 +192,13 @@ public class ChatActivity extends Activity implements View.OnClickListener {
     private void initView() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_chat);
-        mTvState = (TextView) findViewById(R.id.tv_state);
-        mRootLayout = (LinearLayout) findViewById(R.id.root);
+        mTvState = (TextView) findViewById(R.id.tv_state);//蓝牙连接状态
+        mRootLayout = (LinearLayout) findViewById(R.id.root);//根布局
         mChatLayout = (LinearLayout) findViewById(R.id.topPanel);
         mList = (ListView) findViewById(R.id.lv_chat);//聊天的列表
-        mInput = (EditText) findViewById(R.id.inputEdit);
-
-        mSendBtn = (Button) findViewById(R.id.sendBtn);
-        mEmoButton = (ImageView) findViewById(R.id.emotionBtn);
+        mInput = (EditText) findViewById(R.id.inputEdit);//编辑框
+        mSendBtn = (Button) findViewById(R.id.sendBtn);//发送按钮
+        mEmoButton = (ImageView) findViewById(R.id.emotionBtn);//表情包按钮
         //弹出下拉框
         mImageAddButton = (ImageButton) findViewById(R.id.imb_top_add);
         //扫描
@@ -210,14 +207,14 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         mEmoji = new Emoji(this);
         // 初始化表情
         mEmoView = mEmoji.initEmoView(mInput);
+
     }
 
     /**
      * 初始化数据
      */
     private void initData() {
-        mChatListAdapter = new ChatListViewAdapter(this, mChatContentData);//创建一个适配器
-
+        mChatListAdapter = new ChatListViewAdapter(this, mChatContentData);//创建一个显示聊天内容的适配器
         mList.setAdapter(mChatListAdapter);
     }
 
@@ -230,8 +227,8 @@ public class ChatActivity extends Activity implements View.OnClickListener {
             public void onClick(View v) {
                 // 点击输入框后，隐藏表情，显示输入法
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-                imm.showSoftInput(mInput, 0);
-                showEmoPanel(false);
+                imm.showSoftInput(mInput, 0);//显示键盘
+                showEmoPanel(false);//隐藏表情
             }
         });
 
@@ -248,7 +245,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         TaskService.start(this, mHandler);//初始化任务服务
         //向后台服务提交一个任务,作为服务器端监听远程的设备连接
         TaskService.newTask(new Task(mHandler, Task.TASK_START_ACCEPT, null));
-        SoundEffect.getInstance(this).play(SoundEffect.SOUND_PLAY);
+        SoundEffect.getInstance(this).play(SoundEffect.SOUND_PLAY);//播放play的声音
     }
 
     @Override
@@ -277,19 +274,19 @@ public class ChatActivity extends Activity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.sendBtn:
+            case R.id.sendBtn://发送
                 if (TaskService.state == TaskService.BT_STAT_ONLINE) {//并且如果是在线状态的话
                     String msg = mInput.getText().toString().trim();
-                    TaskService.newTask(new Task(mHandler, Task.TASK_GET_REMOTE_STATE, null));//通过点击按钮触发相应线程的启动，比较巧妙，值得学习
-                    if (msg.length() == 0) {
+                    TaskService.newTask(new Task(mHandler, Task.TASK_GET_REMOTE_STATE, null));//获取远程状态信息
+                    if (msg.length() == 0) {//如果聊天内容为null
                         ToastUtil.show(ChatActivity.this, "聊天内容为空");
-                        SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
+                        SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);//发出警告的声音
                         return;
                     }
-                    //------ DEUBG ------
+                    //------ 开启发送信息的服务 ------
                     TaskService.newTask(new Task(mHandler, Task.TASK_SEND_MSG, new Object[]{msg}));
                     showOwnMessage(msg);//立马显示自己发送的消息，所以在handler里面就没有再做处理
-                    isHaspressed = true;//数据库可以开始记录消息啦
+                    isMaySave = true;//数据库可以开始记录消息啦
                     mInput.setText("");
                 } else {
                     ToastUtil.show(ChatActivity.this, "没有连接其它用户，请先扫描并选择周围用户");
@@ -297,7 +294,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                     break;
                 }
                 break;
-            case R.id.emotionBtn:
+            case R.id.emotionBtn://打开表情包
                 System.out.println("Emo btn clicked");
                 // 关闭输入法
                 InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -314,6 +311,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
             case R.id.imb_top_search://扫描设备
                 startActivityForResult(new Intent(this, SelectDeviceActivity.class), REQUES_SELECT_BT_CODE);
                 break;
+
         }
 
 
@@ -328,11 +326,11 @@ public class ChatActivity extends Activity implements View.OnClickListener {
     private void showEmoPanel(boolean show) {
         int mScrollHeight = mEmoji.getScrollHeight();
         if (show && !isShowEmo) {
-            mEmoView.setVisibility(View.VISIBLE);
-            mEmoButton.setImageResource(R.drawable.emo_collapse);
+            mEmoView.setVisibility(View.VISIBLE);//显示表情包
+            mEmoButton.setImageResource(R.drawable.emo_collapse);//修改表情面板按钮图片
             ViewGroup.LayoutParams params = mChatLayout.getLayoutParams();
             params.height = mChatLayout.getHeight() - mScrollHeight;
-            mChatLayout.setLayoutParams(params);
+            mChatLayout.setLayoutParams(params);//重新设置布局的高度
             isShowEmo = true;
         } else if (!show && isShowEmo) {
             mEmoView.setVisibility(View.GONE);
@@ -342,14 +340,20 @@ public class ChatActivity extends Activity implements View.OnClickListener {
             mChatLayout.setLayoutParams(params);
             isShowEmo = false;
         }
-        if (!isUpdate && show) {
+        if (!isUpdate && show) {//第一次打开app的时候,将表情面板添加到rootview中
             LayoutParams para = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
             mRootLayout.addView(mEmoView, para);
             isUpdate = true;
+
         }
     }
 
-
+    /**
+     * 蓝牙状态是否改变
+     *
+     * @param now
+     * @return
+     */
     private boolean isBTStateChanged(int now) {
         if (sBTState != now) {
             sBTState = now;
@@ -365,8 +369,8 @@ public class ChatActivity extends Activity implements View.OnClickListener {
      * @param data
      */
     private void showTargetMessage(HashMap<String, Object> data) {
-        SimpleDateFormat df1 = new SimpleDateFormat("E MM月dd日   HH:mm ");
-        data.put(ChatListViewAdapter.KEY_DATE, df1.format(System.currentTimeMillis()).toString());
+        SimpleDateFormat format = new SimpleDateFormat("E MM月dd日   HH:mm ");
+        data.put(ChatListViewAdapter.KEY_DATE, format.format(System.currentTimeMillis()).toString());
         data.put(ChatListViewAdapter.KEY_SHOW_MSG, true);
         mChatContentData.add(data);
         mChatListAdapter.notifyDataSetChanged();
@@ -379,16 +383,16 @@ public class ChatActivity extends Activity implements View.OnClickListener {
      * @param
      */
     private void showOwnMessage(String msg) {
-        HashMap<String, Object> map = new HashMap<String, Object>();
+        HashMap<String, Object> map = new HashMap<>();
         map.put(ChatListViewAdapter.KEY_ROLE, ChatListViewAdapter.ROLE_OWN);//哪个角色的消息
-        map.put(ChatListViewAdapter.KEY_NAME, mBluetoothAdapter.getName());
-        map.put(ChatListViewAdapter.KEY_TEXT, msg);
-        SimpleDateFormat df2 = new SimpleDateFormat("E MM月dd日  HH:mm ");
-        map.put(ChatListViewAdapter.KEY_DATE, df2.format(System.currentTimeMillis()).toString());
+        map.put(ChatListViewAdapter.KEY_NAME, mBluetoothAdapter.getName());//蓝牙名字
+        map.put(ChatListViewAdapter.KEY_TEXT, msg);//聊天内容
+        SimpleDateFormat dateFormat = new SimpleDateFormat("E MM月dd日  HH:mm ");
+        map.put(ChatListViewAdapter.KEY_DATE, dateFormat.format(System.currentTimeMillis()).toString());
         map.put(ChatListViewAdapter.KEY_SHOW_MSG, true);
         mChatContentData.add(map);
         mChatListAdapter.notifyDataSetChanged();
-        SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_SEND);
+        SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_SEND);//开启发送信息的声音
     }
 
     @Override
@@ -399,12 +403,14 @@ public class ChatActivity extends Activity implements View.OnClickListener {
             mRemoteDevice = data.getParcelableExtra("DEVICE");
             if (mRemoteDevice == null)
                 return;
-            TaskService.newTask(new Task(mHandler, Task.TASK_START_CONN_THREAD, new Object[]{mRemoteDevice}));
+            TaskService.newTask(new Task(mHandler, Task.TASK_START_CONN_THREAD, new Object[]{mRemoteDevice}));//开启连接蓝牙的服务
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-
+    /**
+     * 按两次返回键才退出App
+     */
     long waitTime = 2000;
     long touchTime = 0;
 

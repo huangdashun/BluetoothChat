@@ -63,9 +63,7 @@
             android:divider="@null"
             android:listSelector="#00FFFFFF"
             android:padding="12dp"
-            android:scrollingCache="false"
-            android:stackFromBottom="true"
-            android:transcriptMode="alwaysScroll"></ListView>
+            android:stackFromBottom="true" />
 
         <LinearLayout
             android:id="@+id/inputLayout"
@@ -99,8 +97,7 @@
                     android:ems="10"
                     android:hint="输入聊天内容"
                     android:padding="5dp"
-                    android:textSize="18dp">
-                    </EditText>
+                    android:textSize="18dp"></EditText>
 
                 <Button
                     android:id="@+id/sendBtn"

@@ -28,15 +28,16 @@ import huangshun.it.com.btproject.R;
 
 /**
  * Created by hs on 2017/3/27.
+ * 聊天记录的适配器
  */
 public class ChatListViewAdapter extends BaseAdapter {
     public static final int ROLE_OWN = 0;
     public static final int ROLE_TARGET = 1;
     public static final int ROLE_OTHER = 2;
-    public static final String KEY_ROLE = "role";
-    public static final String KEY_TEXT = "text";
-    public static final String KEY_DATE = "date";
-    public static final String KEY_NAME = "name";
+    public static final String KEY_ROLE = "role";//角色
+    public static final String KEY_TEXT = "text";//内容
+    public static final String KEY_DATE = "date";//日期
+    public static final String KEY_NAME = "name";//蓝牙名称
     public static final String KEY_SHOW_MSG = "show_msg";
 
     private Context mContext;
@@ -107,7 +108,7 @@ public class ChatListViewAdapter extends BaseAdapter {
         switch (role) {
             case ROLE_OWN:    // 显示在右边
                 rLayout.removeAllViews();
-                param = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+                param = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
                 param.addRule(RelativeLayout.ALIGN_PARENT_TOP);
                 date.setText((String) mDatalist.get(position).get(KEY_DATE));
                 rLayout.addView(date, param);
@@ -115,8 +116,8 @@ public class ChatListViewAdapter extends BaseAdapter {
                 text.setTextColor(Color.WHITE);
                 text.setBackgroundResource(R.drawable.chart_list_item_right_selector);
                 // <emoxxx>
-                Spanned spann = makeChatContent((String) mDatalist.get(position).get(KEY_TEXT));
-                text.setText(spann);
+                Spanned span = makeChatContent((String) mDatalist.get(position).get(KEY_TEXT));
+                text.setText(span);
                 ClickListener listener = (ClickListener) text.getTag();
                 if (listener != null) {
                     if ((Boolean) mDatalist.get(position).get(KEY_SHOW_MSG)) {
@@ -134,15 +135,15 @@ public class ChatListViewAdapter extends BaseAdapter {
 
             case ROLE_TARGET:    // 显示在左边
                 rLayout.removeAllViews();
-                param = new LayoutParams(LayoutParams.FILL_PARENT, LayoutParams.WRAP_CONTENT);
+                param = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
                 param.addRule(RelativeLayout.ALIGN_PARENT_TOP);
                 date.setText((String) mDatalist.get(position).get(KEY_DATE));
                 rLayout.addView(date, param);
 
                 text.setTextColor(Color.BLACK);
                 text.setBackgroundResource(R.drawable.chart_list_item_left_selector);
-                Spanned spann2 = makeChatContent((String) mDatalist.get(position).get(KEY_TEXT));
-                text.setText(spann2);
+                Spanned span2 = makeChatContent((String) mDatalist.get(position).get(KEY_TEXT));
+                text.setText(span2);
                 ClickListener listener2 = (ClickListener) text.getTag();
                 if (listener2 != null) {
                     if ((Boolean) mDatalist.get(position).get(KEY_SHOW_MSG)) {
