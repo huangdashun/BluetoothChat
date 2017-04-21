@@ -1,4 +1,4 @@
-package huangshun.it.com.btproject;
+package huangshun.it.com.btproject.activity;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ListView;
 
 import huangshun.it.com.btproject.DB.DatabaseHelper;
+import huangshun.it.com.btproject.R;
 import huangshun.it.com.btproject.utils.EmoContentUtil;
 
 public class RecordListActivity extends Activity {

@@ -23,7 +23,7 @@ import java.util.UUID;
 
 import huangshun.it.com.btproject.Model.Task;
 import huangshun.it.com.btproject.protocol.DataProtocol;
-import huangshun.it.com.btproject.protocol.Message;
+import huangshun.it.com.btproject.bean.Message;
 import huangshun.it.com.btproject.sound.SoundEffect;
 import huangshun.it.com.btproject.view.ChatListViewAdapter;
 

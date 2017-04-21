@@ -2,6 +2,8 @@ package huangshun.it.com.btproject.protocol;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 
+import huangshun.it.com.btproject.bean.Message;
+
 /**
  * 
  * Created by hs on 2017/3/23.

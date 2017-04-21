@@ -1,4 +1,4 @@
-package huangshun.it.com.btproject.protocol;
+package huangshun.it.com.btproject.bean;
 
 /**
  * Created by hs on 2017/3/17.

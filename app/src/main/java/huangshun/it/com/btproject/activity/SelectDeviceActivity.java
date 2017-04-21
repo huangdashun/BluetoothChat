@@ -1,4 +1,4 @@
-package huangshun.it.com.btproject;
+package huangshun.it.com.btproject.activity;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -20,6 +20,8 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Set;
+
+import huangshun.it.com.btproject.R;
 
 public class SelectDeviceActivity extends Activity implements OnClickListener, OnItemClickListener {
     private final String TAG = "MainActivity";

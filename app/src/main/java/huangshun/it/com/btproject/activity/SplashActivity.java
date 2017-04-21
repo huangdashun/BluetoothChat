@@ -1,10 +1,12 @@
-package huangshun.it.com.btproject;
+package huangshun.it.com.btproject.activity;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Window;
+
+import huangshun.it.com.btproject.R;
 
 /**
  * 闪屏页,通常是展示广告或appLogo的页面
@@ -28,7 +30,7 @@ public class SplashActivity extends Activity {
     }
 
     private void startMainActivity() {
-        Intent intent = new Intent(this, ChatActivity.class);
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         //关闭当前页
         finish();

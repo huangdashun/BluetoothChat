@@ -6,14 +6,19 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!--读写权限-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <supports-screens
-    android:anyDensity="true"
-    android:largeScreens="true"
-    android:normalScreens="true"
-    android:resizeable="true"
-    android:smallScreens="true"/>
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true" />
+
     <uses-permission android:name="android.permission.VIBRATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -22,7 +27,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".SplashActivity"
+            android:name=".activity.SplashActivity"
             android:theme="@style/NoTitleTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,32 +36,26 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".service.TaskService">
-
-        </service>
+        <service android:name=".service.TaskService" />
 
         <activity
-            android:name=".SelectDeviceActivity"
-            android:screenOrientation="portrait">
-
-        </activity>
-
+            android:name=".activity.SelectDeviceActivity"
+            android:screenOrientation="portrait" />
         <activity
-            android:name=".ChatActivity"
+            android:name=".activity.ChatActivity"
             android:launchMode="singleTask"
             android:screenOrientation="portrait"
-            android:windowSoftInputMode="adjustPan">
-
-        </activity>
+            android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".RecordListActivity"
+            android:name=".activity.RecordListActivity"
             android:configChanges="orientation|keyboardHidden"
             android:label="@string/record" />
         <activity
-            android:name=".PopDialogActivity"
-            android:theme="@style/MyDialogStyleTop">
-
-        </activity>
+            android:name=".activity.PopDialogActivity"
+            android:theme="@style/MyDialogStyleTop" />
+        <activity android:name=".activity.LoginActivity" />
+        <activity android:name=".activity.ForgetPwdActivity" />
+        <activity android:name=".activity.RegisterActivity"></activity>
     </application>
 
 </manifest>

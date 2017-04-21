@@ -3,7 +3,7 @@
  * @���� http://blog.csdn.net/evankaka/
  * @��������������΢�������б��
  */
-package huangshun.it.com.btproject;
+package huangshun.it.com.btproject.activity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -20,6 +20,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import huangshun.it.com.btproject.R;
 import huangshun.it.com.btproject.utils.ToastUtil;
 
 /**

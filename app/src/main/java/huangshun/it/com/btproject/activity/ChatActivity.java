@@ -1,4 +1,4 @@
-package huangshun.it.com.btproject;
+package huangshun.it.com.btproject.activity;
 
 import android.Manifest;
 import android.app.Activity;
@@ -36,6 +36,7 @@ import java.util.HashMap;
 import huangshun.it.com.btproject.DB.DatabaseHelper;
 import huangshun.it.com.btproject.Model.Emoji;
 import huangshun.it.com.btproject.Model.Task;
+import huangshun.it.com.btproject.R;
 import huangshun.it.com.btproject.service.TaskService;
 import huangshun.it.com.btproject.sound.SoundEffect;
 import huangshun.it.com.btproject.utils.NotificationUtil;
