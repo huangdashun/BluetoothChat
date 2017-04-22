@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 /**
  * Created by hs on 2017/3/20.
+ * 存储聊天记录的
  */
 public class DatabaseHelper extends SQLiteOpenHelper {
 

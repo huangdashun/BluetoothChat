@@ -27,11 +27,11 @@ public class DBAdapter {
     public static final String KEY_PASSWORD = "password";//表属性password
 
     private SQLiteDatabase db;
-    private Context xContext;
+    private Context mContext;
     private DBOpenHelper dbOpenHelper;
 
     public DBAdapter(Context context) {
-        xContext = context;
+        mContext = context;
     }
 
     /**
@@ -40,7 +40,7 @@ public class DBAdapter {
      * @throws SQLiteException
      */
     public void open() throws SQLiteException {
-        dbOpenHelper = new DBOpenHelper(xContext, DB_NAME, null, DB_VERSION);
+        dbOpenHelper = new DBOpenHelper(mContext, DB_NAME, null, DB_VERSION);
         try {
             db = dbOpenHelper.getWritableDatabase();
         } catch (SQLiteException e) {
@@ -99,7 +99,7 @@ public class DBAdapter {
     public User[] queryOneData(long id) {
         Cursor result = db.query(DB_TABLE, new String[]{KEY_ID, KEY_USERNAME, KEY_PASSWORD},
                 KEY_ID + "=" + id, null, null, null, null);
-        return ConvertTouser(result);
+        return ConvertToUser(result);
     }
 
     /**
@@ -108,10 +108,10 @@ public class DBAdapter {
      * @param username
      * @return
      */
-    public User[] queryuserData(String username) {
+    public User[] queryUserData(String username) {
         Cursor result = db.query(DB_TABLE, new String[]{KEY_ID, KEY_USERNAME, KEY_PASSWORD},
                 KEY_USERNAME + "=" + "'" + username + "'", null, null, null, null);
-        return ConvertTouser(result);
+        return ConvertToUser(result);
     }
 
     /**
@@ -123,7 +123,7 @@ public class DBAdapter {
         Cursor result = db.query(DB_TABLE, new String[]{KEY_ID, KEY_USERNAME, KEY_PASSWORD},
                 null, null, null, null, null);
         System.out.print(result);
-        return ConvertTouser(result);
+        return ConvertToUser(result);
     }
 
     public long updateOneData(long id, User user) {
@@ -135,7 +135,7 @@ public class DBAdapter {
         return db.update(DB_TABLE, newValues, KEY_ID + "=" + id, null);
     }
 
-    private User[] ConvertTouser(Cursor cursor) {
+    private User[] ConvertToUser(Cursor cursor) {
         int resultCounts = cursor.getCount();
         if (resultCounts == 0 || !cursor.moveToFirst()) {
             return null;
@@ -183,12 +183,12 @@ public class DBAdapter {
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase _db, int oldVersion, int newVersion) {
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
             //函数在数据库需要升级时被调用，
             //一般用来删除旧的数据库表，
             //并将数据转移到新版本的数据库表中
-            _db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
-            onCreate(_db);
+            db.execSQL("DROP TABLE IF EXISTS " + DB_TABLE);
+            onCreate(db);
             Log.i(DB_ACTION, "Upgrade");
         }
 
