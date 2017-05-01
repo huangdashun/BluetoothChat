@@ -15,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
     private ArrayList<String> mDeviceNameList = new ArrayList<>();
     private ArrayList<BluetoothDevice> mDeviceList = new ArrayList<>();
     private int requestBluCode = 1;//请求打开蓝牙的请求码
+    private ImageView mBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +44,8 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
         setContentView(R.layout.activity_scan_device);
 
         mDevList = (ListView) findViewById(R.id.devList);
+        mBack = (ImageView) findViewById(R.id.im_back);
+        mBack.setOnClickListener(this);
 
         mDevList.setOnItemClickListener(this);
 
@@ -118,11 +122,16 @@ public class SelectDeviceActivity extends Activity implements OnClickListener, O
      */
     @Override
     public void onClick(View v) {
-        if (!mBluetoothAdapter.isDiscovering()) {
-            mBluetoothAdapter.startDiscovery();
+        if (v.getId() == R.id.scanBtn) {
+            if (!mBluetoothAdapter.isDiscovering()) {
+                mBluetoothAdapter.startDiscovery();
 //			// 开始显示进度
 //			setProgressBarIndeterminateVisibility(true);
+            }
+        } else if (v.getId() == R.id.im_back) {
+            finish();
         }
+
     }
 
     private void findDevice() {

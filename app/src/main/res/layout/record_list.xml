@@ -1,21 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
-     <ListView android:id="@+id/lv_query"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@color/theme_color">
+
+
+        <ImageView
+            android:id="@+id/im_back"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/back"
+            android:textSize="20dp" />
+
+        <TextView
+            android:id="@+id/tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:gravity="center"
+            android:text="聊天记录"
+            android:textColor="@android:color/white"
+            android:textSize="20dp"
+            android:visibility="visible" />
+
+        <ImageView
+            android:id="@+id/im_delete"
+            android:layout_width="30dp"
+            android:layout_height="25dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="10dp"
+            android:src="@drawable/delete_record"
+            android:textSize="20dp" />
+    </RelativeLayout>
+
+    <ListView
+        android:id="@+id/lv_query"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        
-        android:transcriptMode="alwaysScroll"
         android:layout_weight="1"
-    />
-     <Button
-    android:id="@+id/return_button"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="返回"
-    
-    />
-    </LinearLayout>
+        android:transcriptMode="alwaysScroll" />
+
+</LinearLayout>
