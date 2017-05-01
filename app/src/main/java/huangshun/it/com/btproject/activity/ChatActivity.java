@@ -66,6 +66,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
     private Button mSendBtn;
     private ImageView mEmoButton;
     private TextView mTvState;
+    private TextView mTvTitle;
     private ImageButton mImageAddButton;
     private ImageButton mImageSearchButton;
     private BluetoothDevice mRemoteDevice;
@@ -139,6 +140,11 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                     }
                     break;
                 case Task.TASK_GET_REMOTE_STATE://获取远程连接的状态
+                    if (((String) msg.obj).contains("正在连接")) {//防止提示信息过长
+                        mTvTitle.setVisibility(View.GONE);
+                    } else {
+                        mTvTitle.setVisibility(View.VISIBLE);
+                    }
                     mTvState.setText((String) msg.obj);//设置连接的状态
                     if (sAliveCount <= 0) {
                         if (isBTStateChanged(msg.arg1) && msg.arg1 != TaskService.BT_STAT_WAIT)
@@ -194,6 +200,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_chat);
         mTvState = (TextView) findViewById(R.id.tv_state);//蓝牙连接状态
+        mTvTitle = (TextView) findViewById(R.id.tv_title);//标题栏
         mRootLayout = (LinearLayout) findViewById(R.id.root);//根布局
         mChatLayout = (LinearLayout) findViewById(R.id.topPanel);
         mList = (ListView) findViewById(R.id.lv_chat);//聊天的列表
@@ -289,6 +296,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                     showOwnMessage(msg);//立马显示自己发送的消息，所以在handler里面就没有再做处理
                     isMaySave = true;//数据库可以开始记录消息啦
                     mInput.setText("");
+                    mList.setSelection(mChatListAdapter.getCount());
                 } else {
                     ToastUtil.show(ChatActivity.this, "没有连接其它用户，请先扫描并选择周围用户");
                     SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
@@ -375,6 +383,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         data.put(ChatListViewAdapter.KEY_SHOW_MSG, true);
         mChatContentData.add(data);
         mChatListAdapter.notifyDataSetChanged();
+        mList.setSelection(mChatListAdapter.getCount());
         SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_RECV);
     }
 
@@ -393,6 +402,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         map.put(ChatListViewAdapter.KEY_SHOW_MSG, true);
         mChatContentData.add(map);
         mChatListAdapter.notifyDataSetChanged();
+        mList.setSelection(mChatListAdapter.getCount());
         SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_SEND);//开启发送信息的声音
     }
 
