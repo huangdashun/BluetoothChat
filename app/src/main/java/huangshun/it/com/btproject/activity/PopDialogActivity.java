@@ -31,7 +31,7 @@ public class PopDialogActivity extends Activity implements OnClickListener {
     private LinearLayout mDeviceVisible;
     private LinearLayout mAlterName;
     private LinearLayout mChattingRecords;
-//	private LinearLayout mFeedBack;
+    private LinearLayout mExit;
 
     private BluetoothAdapter mBluetoothAdapter;
 
@@ -48,7 +48,7 @@ public class PopDialogActivity extends Activity implements OnClickListener {
         mDeviceVisible = (LinearLayout) findViewById(R.id.device_visible);//设备可见
         mAlterName = (LinearLayout) findViewById(R.id.alter_name);//修改昵称
         mChattingRecords = (LinearLayout) findViewById(R.id.chatting_records);//聊天记录
-//		mFeedBack = (LinearLayout)findViewById(R.id.id_feedback);
+        mExit = (LinearLayout) findViewById(R.id.exit);
         // 获得蓝牙管理器
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
@@ -60,7 +60,7 @@ public class PopDialogActivity extends Activity implements OnClickListener {
         mDeviceVisible.setOnClickListener(this);
         mAlterName.setOnClickListener(this);
         mChattingRecords.setOnClickListener(this);
-//		mFeedBack.setOnClickListener(this);
+        mExit.setOnClickListener(this);
     }
 
     @Override
@@ -82,6 +82,10 @@ public class PopDialogActivity extends Activity implements OnClickListener {
                 Intent recordIntent = new Intent(PopDialogActivity.this, RecordListActivity.class);
                 startActivity(recordIntent);
                 break;
+            case R.id.exit://退出登录
+                Intent loginActivity = new Intent(PopDialogActivity.this, LoginActivity.class);
+                loginActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(loginActivity);
         }
     }
 
