@@ -4,9 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
@@ -164,6 +166,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         initView();
         initData();
         initListener();
+        initBroadcast();
         // 获得蓝牙管理器
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         if (mBluetoothAdapter == null) {
@@ -190,6 +193,12 @@ public class ChatActivity extends Activity implements View.OnClickListener {
             // 默认设备作为服务端
             startServiceAsServer();
         }
+    }
+
+    private void initBroadcast() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction("close.chat.activity");
+        registerReceiver(mBroadcastReceiver, filter);
     }
 
 
@@ -440,6 +449,13 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         return super.onKeyDown(keyCode, event);
     }
 
+    private BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            unregisterReceiver(this);
+            ((Activity) context).finish();
+        }
+    };
 }
 
 

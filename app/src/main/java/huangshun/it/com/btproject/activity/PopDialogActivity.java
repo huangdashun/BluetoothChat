@@ -86,6 +86,8 @@ public class PopDialogActivity extends Activity implements OnClickListener {
                 Intent loginActivity = new Intent(PopDialogActivity.this, LoginActivity.class);
                 loginActivity.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(loginActivity);
+                sendBroadcast(new Intent("close.chat.activity"));
+                finish();
         }
     }
 
