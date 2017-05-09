@@ -287,7 +287,6 @@ public class TaskService extends Service {
 
         public void cancel() {
             try {
-                Log.d(TAG, "AcceptThread canceled");
                 isCancel = true;
                 isServerMode = false;
                 mmServerSocket.close();
@@ -321,8 +320,6 @@ public class TaskService extends Service {
                 mConnThread.cancel();
             }
 
-            // Use a temporary object that is later assigned to mmSocket,
-            // because mmSocket is final
             mmDevice = device;
             try {
                 mmSocket = device.createRfcommSocketToServiceRecord(UUID
@@ -338,14 +335,10 @@ public class TaskService extends Service {
         }
 
         public void run() {
-            // Cancel discovery because it will slow down the connection
             mBluetoothAdapter.cancelDiscovery();
             try {
-                // Connect the device through the socket. This will block
-                // until it succeeds or throws an exception
                 mmSocket.connect();
             } catch (IOException connectException) {
-                // Unable to connect; close the socket and get out
                 Log.e(TAG, "Connect server failed");
                 try {
                     mmSocket.close();
@@ -355,7 +348,7 @@ public class TaskService extends Service {
                 mAcceptThread.start();
                 isServerMode = true;
                 return;
-            } // Do work to manage the connection (in a separate thread)
+            }
             manageConnectedSocket(mmSocket);
         }
 

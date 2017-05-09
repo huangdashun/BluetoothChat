@@ -100,17 +100,20 @@ public class ChatListViewAdapter extends BaseAdapter {
             db.open();
             //第一步，从数据库中读取出相应数据，并保存在字节数组中
             Cursor cursor = db.queryAllData();
-            int index = cursor.getColumnIndex("image");
-            if (index != -1) {
-                byte[] blob = cursor.getBlob(cursor.getColumnIndex("image"));
-                //第二步，调用BitmapFactory的解码方法decodeByteArray把字节数组转换为Bitmap对象
-                Bitmap bmp2 = BitmapFactory.decodeByteArray(blob, 0, blob.length);
-                //第三步，调用BitmapDrawable构造函数生成一个BitmapDrawable对象，该对象继承Drawable对象，所以在需要处直接使用该对象即可
-                @SuppressWarnings("deprecation")
-                BitmapDrawable bd = new BitmapDrawable(bmp2);
-                holder.mOwnerHeadImg.setImageDrawable(bd);
+            if(cursor != null){
+                int index = cursor.getColumnIndex("image");
+                if (index != -1) {
+                    byte[] blob = cursor.getBlob(cursor.getColumnIndex("image"));
+                    //第二步，调用BitmapFactory的解码方法decodeByteArray把字节数组转换为Bitmap对象
+                    Bitmap bmp2 = BitmapFactory.decodeByteArray(blob, 0, blob.length);
+                    //第三步，调用BitmapDrawable构造函数生成一个BitmapDrawable对象，该对象继承Drawable对象，所以在需要处直接使用该对象即可
+                    @SuppressWarnings("deprecation")
+                    BitmapDrawable bd = new BitmapDrawable(bmp2);
+                    holder.mOwnerHeadImg.setImageDrawable(bd);
+                }
+                db.close();
             }
-            db.close();
+
         } else {
             holder.mOtherLayout.setVisibility(View.VISIBLE);
             holder.mOwnerLayout.setVisibility(View.GONE);

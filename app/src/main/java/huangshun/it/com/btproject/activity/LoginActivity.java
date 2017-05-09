@@ -42,7 +42,6 @@ public class LoginActivity extends Activity implements View.OnClickListener {
     private Context mContext;
     private SelectPicPopupWindow mMenuWindow; // 自定义的头像编辑弹出框
     private static final String IMAGE_FILE_NAME = "avatarImage.jpg";// 头像文件名称
-    private String mUrlpath;            // 图片本地路径
     private static final int REQUESTCODE_PICK = 0;        // 相册选图标记
     private static final int REQUESTCODE_TAKE = 1;        // 相机拍照标记
     private static final int REQUESTCODE_CUTTING = 2;    // 图片裁切标记

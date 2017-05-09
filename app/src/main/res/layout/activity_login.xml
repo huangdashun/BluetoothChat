@@ -22,7 +22,8 @@
             android:layout_below="@id/avatarImg"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="5dp"
-            android:text="huangshun"
+            android:text="sdfasdfaf"
+            android:visibility="invisible"
             android:textColor="#CEC9E7"
             android:textSize="16dp" />
 
