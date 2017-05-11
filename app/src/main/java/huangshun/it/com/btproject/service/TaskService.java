@@ -41,7 +41,6 @@ public class TaskService extends Service {
     public static int state = 3;
 
     private final String UUID_STR = "00001101-0000-1000-8000-00805F9B34FB";
-    public static final String DEVICE_NAME = "device_name";
 
     private final String TAG = "TaskService";
     private TaskThread mThread;//启动任务服务线程
@@ -94,7 +93,6 @@ public class TaskService extends Service {
                     } else {
                         return;
                     }
-
                     break;
                 default:
                     break;

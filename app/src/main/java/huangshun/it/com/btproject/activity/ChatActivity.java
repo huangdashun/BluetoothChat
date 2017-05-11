@@ -45,8 +45,6 @@ import huangshun.it.com.btproject.utils.NotificationUtil;
 import huangshun.it.com.btproject.utils.ToastUtil;
 import huangshun.it.com.btproject.view.ChatListViewAdapter;
 
-import static huangshun.it.com.btproject.Model.Task.TASK_SEND_MSG_FAIL;
-
 /**
  * Created by hs on 2017/3/27.
  */
@@ -94,12 +92,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
             String date = simpleDateFormat.format(System.currentTimeMillis()).toString();
             switch (msg.what) {
-                case TASK_SEND_MSG_FAIL://当没有连接用户的时候
-//                    ToastUtil.show(ChatActivity.this, "没有连接其它用户，点击\"Menu\"扫描并选择周国用户");
-//                    SoundEffect.getInstance(ChatActivity.this).play(SoundEffect.SOUND_ERR);
-//                    break;
                 case Task.TASK_SEND_MSG://发送信息
-//			   showToast(msg.obj.toString());
                     String writeMessage = msg.obj.toString();
 
                     if (writeMessage != null && isMaySave) {
@@ -131,7 +124,6 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                         SQLiteDatabase insertDb = insertDbHelper.getWritableDatabase();
                         insertDb.insert("info", null, values2);
                     }
-
                     if (msg.obj == null)
                         return;
                     if (msg.obj instanceof HashMap<?, ?>) {
@@ -153,7 +145,6 @@ public class ChatActivity extends Activity implements View.OnClickListener {
                             NotificationUtil.notifyMessage(ChatActivity.this, (String) msg.obj, ChatActivity.this);
                     }
                     break;
-
             }
         }
     };
@@ -453,6 +444,7 @@ public class ChatActivity extends Activity implements View.OnClickListener {
         @Override
         public void onReceive(Context context, Intent intent) {
             unregisterReceiver(this);
+            NotificationUtil.clearNotify();
             ((Activity) context).finish();
         }
     };

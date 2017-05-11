@@ -14,11 +14,12 @@ import huangshun.it.com.btproject.R;
  */
 public class NotificationUtil {
     public static final int NOTIFY_ID1 = 1001;
+    private static NotificationManager nm;
 
     public static void notifyMessage(Context context, String msg, Activity activity) {
         //Notification builder;
         PendingIntent contentIntent = null;
-        NotificationManager nm;
+
         // 发送通知需要用到NotificationManager对象
         nm = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         // 消息对象
@@ -42,5 +43,9 @@ public class NotificationUtil {
                 .setAutoCancel(true).build();
         // 参数1通知的ID，参数2发送哪个通知
         nm.notify(NOTIFY_ID1, notification);
+    }
+
+    public static void clearNotify() {
+        nm.cancelAll();
     }
 }
