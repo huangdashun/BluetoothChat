@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">BluetoothChat</string>
+    <string name="app_name">蓝牙聊天室</string>
     <string name="action_settings">Settings</string>
     <!-- Options Menu -->
     <string name="connect">我的朋友</string>
